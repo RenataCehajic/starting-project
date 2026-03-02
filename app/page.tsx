@@ -1,3 +1,3 @@
 export default function LandingPage() {
-  return <p>Landing page</p>;
+  return <p>Route: / — Landing page</p>;
 }

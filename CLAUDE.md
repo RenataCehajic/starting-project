@@ -1,17 +1,21 @@
 # CLAUDE.md
 
-We're builing the app described in @SPEC.MD. Read that file for general architectural tasks or to double-check the exact database structure, tech stack or application architecture.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+We're building the app described in @SPEC.MD. Read that file for general architectural tasks or to double-check the exact database structure, tech stack or application architecture.
 
 Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snippets.
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
 
 ```bash
 bun dev          # start dev server (http://localhost:3000)
 bun build        # production build
+bun start        # start production server
 bun lint         # run ESLint
+bun format       # run oxfmt formatter
+bun test         # run tests in watch mode (vitest)
+bun test:run     # run tests once
 ```
 
 All package management uses **Bun** — never use npm, yarn, or pnpm.
@@ -22,6 +26,7 @@ Copy `.env.example` to `.env.local` and fill in values:
 
 - `BETTER_AUTH_SECRET` — must be 32+ characters
 - `BETTER_AUTH_URL` — full base URL (e.g. `http://localhost:3000`)
+- `NEXT_PUBLIC_APP_URL` — full base URL, used by `lib/auth-client.ts`
 - `DB_PATH` — path to SQLite file (e.g. `./database.db`)
 
 ## Architecture
@@ -40,14 +45,14 @@ This is a **Next.js App Router** app (TypeScript). The `@/*` path alias maps to 
 - Single shared `bun:sqlite` `Database` instance exported from `lib/db.ts`
 - better-auth uses this same instance for its managed tables
 - App tables use raw SQL — no ORM
-- Schema for `notes` table (see `SPEC.MD`): `id`, `user_id`, `title`, `content_json` (TipTap JSON string), `is_shared`, `share_id`, `created_at`, `updated_at`
+- Schema for `notes` table: `id`, `user_id`, `title`, `content_json` (TipTap JSON string), `is_public`, `public_slug`, `created_at`, `updated_at`
 
 ### API Routes (`app/api/`)
 
 - `app/api/auth/[...all]/route.ts` — catch-all handled entirely by better-auth
 - Notes CRUD: `GET/POST /api/notes`, `GET/PUT/DELETE /api/notes/:id`
-- Sharing: `POST /api/notes/:id/share`, `POST /api/notes/:id/unshare`
-- Public: `GET /api/share/:shareId`
+- Sharing: `POST /api/notes/:id/share` with body `{ isPublic: boolean }` — generates/clears `public_slug`
+- Public: `GET /api/public-notes/:slug`
 - All `/api/notes*` routes require a valid session; ownership is verified on every mutation
 
 ### Route Structure

@@ -1,3 +1,3 @@
 export default function AuthenticatePage() {
-  return <p>Authentication coming soon.</p>;
+  return <p>Route: /authenticate — Auth page</p>;
 }
