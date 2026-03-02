@@ -33,7 +33,7 @@ This is a **Next.js App Router** app (TypeScript). The `@/*` path alias maps to 
 - **Server-side:** `auth` from `lib/auth.ts` — used in Route Handlers and Server Components
 - **Client-side:** `authClient` from `lib/auth-client.ts` — used in Client Components
 - better-auth manages its own tables (`user`, `session`, `account`, `verification`) in SQLite automatically
-- All `/app/**` routes are protected by `middleware.ts` via `getSessionCookie`
+- All `/app/**` routes are protected by `proxy.ts` via `getSessionCookie`
 
 ### Database (`lib/db.ts`)
 
@@ -55,7 +55,7 @@ This is a **Next.js App Router** app (TypeScript). The `@/*` path alias maps to 
 | Route               | Purpose                    |
 | ------------------- | -------------------------- |
 | `/`                 | Landing page               |
-| `/login`, `/signup` | Auth pages                 |
+| `/authenticate`     | Auth page (sign-in/sign-up)|
 | `/app`              | Notes list (protected)     |
 | `/app/n/:id`        | Note editor (protected)    |
 | `/share/:shareId`   | Public read-only note view |
