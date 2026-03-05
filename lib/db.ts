@@ -69,3 +69,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_notes_public_slug ON notes(public_slug);
   CREATE INDEX IF NOT EXISTS idx_notes_is_public ON notes(is_public);
 `);
+
+export function getDb() {
+  return db;
+}
+
+export function query<T>(sql: string, params?: unknown[]): T[] {
+  return db.query<T, unknown[]>(sql).all(params ?? []);
+}
+
+export function get<T>(sql: string, params?: unknown[]): T | undefined {
+  return db.query<T, unknown[]>(sql).get(params ?? []) ?? undefined;
+}
+
+export function run(sql: string, params?: unknown[]): void {
+  db.run(sql, params ?? []);
+}
