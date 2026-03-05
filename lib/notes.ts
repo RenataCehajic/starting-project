@@ -1,22 +1,6 @@
 import { randomBytes } from "crypto";
 import { db } from "./db";
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS notes (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    title TEXT NOT NULL,
-    content_json TEXT NOT NULL,
-    is_public INTEGER NOT NULL DEFAULT 0,
-    public_slug TEXT UNIQUE,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES user(id)
-  )
-`);
-db.run(`CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id)`);
-db.run(`CREATE INDEX IF NOT EXISTS idx_notes_public_slug ON notes(public_slug)`);
-
 export type Note = {
   id: string;
   userId: string;
