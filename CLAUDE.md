@@ -6,6 +6,9 @@ We're building the app described in @SPEC.MD. Read that file for general archite
 
 Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snippets.
 
+Whenever working with any third-party library or something similar, you MUST look up the official documentation to ensure that you're working with up-to-date information.
+Use the DocsExplorer subagent for efficient documentation lookup.
+
 ## Commands
 
 ```bash
@@ -57,13 +60,13 @@ This is a **Next.js App Router** app (TypeScript). The `@/*` path alias maps to 
 
 ### Route Structure
 
-| Route               | Purpose                    |
-| ------------------- | -------------------------- |
-| `/`                 | Landing page               |
-| `/authenticate`     | Auth page (sign-in/sign-up)|
-| `/app`              | Notes list (protected)     |
-| `/app/n/:id`        | Note editor (protected)    |
-| `/share/:shareId`   | Public read-only note view |
+| Route             | Purpose                     |
+| ----------------- | --------------------------- |
+| `/`               | Landing page                |
+| `/authenticate`   | Auth page (sign-in/sign-up) |
+| `/app`            | Notes list (protected)      |
+| `/app/n/:id`      | Note editor (protected)     |
+| `/share/:shareId` | Public read-only note view  |
 
 ### Editor
 
