@@ -74,14 +74,17 @@ export function getDb() {
   return db;
 }
 
-export function query<T>(sql: string, params?: unknown[]): T[] {
-  return db.query<T, unknown[]>(sql).all(params ?? []);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BindParams = any[];
+
+export function query<T>(sql: string, params?: BindParams): T[] {
+  return db.query<T, BindParams>(sql).all(params ?? []);
 }
 
-export function get<T>(sql: string, params?: unknown[]): T | undefined {
-  return db.query<T, unknown[]>(sql).get(params ?? []) ?? undefined;
+export function get<T>(sql: string, params?: BindParams): T | undefined {
+  return db.query<T, BindParams>(sql).get(params ?? []) ?? undefined;
 }
 
-export function run(sql: string, params?: unknown[]): void {
+export function run(sql: string, params?: BindParams): void {
   db.run(sql, params ?? []);
 }
