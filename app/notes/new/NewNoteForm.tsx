@@ -9,6 +9,7 @@ import EditorToolbar from "@/app/components/EditorToolbar";
 export default function NewNoteForm() {
   const [title, setTitle] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -25,11 +26,13 @@ export default function NewNoteForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     const contentJson = JSON.stringify(
       editor?.getJSON() ?? { type: "doc", content: [] }
     );
     startTransition(async () => {
-      await createNoteAction(title.trim(), contentJson);
+      const result = await createNoteAction(title.trim(), contentJson);
+      if (result?.error) setError(result.error);
     });
   }
 
@@ -44,6 +47,7 @@ export default function NewNoteForm() {
           placeholder="Note title"
           required
           autoFocus
+          maxLength={200}
           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus-visible:ring-white"
         />
       </label>
@@ -63,6 +67,12 @@ export default function NewNoteForm() {
           <EditorContent editor={editor} />
         </div>
       </div>
+
+      {error && (
+        <p role="alert" aria-live="polite" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
 
       <div className="flex items-center gap-3">
         <button

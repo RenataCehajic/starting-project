@@ -2,49 +2,74 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { authClient } from "@/lib/auth-client";
 
 type Props = {
   isSignUp: boolean;
 };
 
+function mapAuthError(code: string | undefined): string {
+  switch (code) {
+    case "INVALID_EMAIL_OR_PASSWORD":
+    case "USER_NOT_FOUND":
+      return "Invalid email or password.";
+    case "USER_ALREADY_EXISTS":
+      return "An account with this email already exists.";
+    case "EMAIL_NOT_VERIFIED":
+      return "Please verify your email address before signing in.";
+    case "PASSWORD_TOO_SHORT":
+      return "Password must be at least 8 characters.";
+    case "INVALID_EMAIL":
+      return "Please enter a valid email address.";
+    default:
+      return "Something went wrong. Please try again.";
+  }
+}
+
 export default function AuthForm({ isSignUp }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    const email = form.get("email") as string;
+    const email = (form.get("email") as string).trim().toLowerCase();
     const password = form.get("password") as string;
 
-    setError(null);
-    setPending(true);
-
-    if (isSignUp) {
-      await authClient.signUp.email(
-        { email, password, name: email },
-        {
-          onSuccess: () => router.push("/dashboard"),
-          onError: (ctx) => setError(ctx.error.message),
-        }
-      );
-    } else {
-      await authClient.signIn.email(
-        { email, password },
-        {
-          onSuccess: () => router.push("/dashboard"),
-          onError: (ctx) => setError(ctx.error.message),
-        }
-      );
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
     }
 
-    setPending(false);
+    setError(null);
+    startTransition(async () => {
+      if (isSignUp) {
+        await authClient.signUp.email(
+          { email, password, name: email },
+          {
+            onSuccess: () => router.push("/dashboard"),
+            onError: (ctx) => setError(mapAuthError(ctx.error.code)),
+          }
+        );
+      } else {
+        await authClient.signIn.email(
+          { email, password },
+          {
+            onSuccess: () => router.push("/dashboard"),
+            onError: (ctx) => setError(mapAuthError(ctx.error.code)),
+          }
+        );
+      }
+    });
   }
 
-  const submitLabel = pending ? "Please wait…" : isSignUp ? "Create account" : "Sign in";
+  const submitLabel = isPending ? "Please wait…" : isSignUp ? "Create account" : "Sign in";
 
   return (
     <main className="flex flex-1 items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-950">
@@ -64,6 +89,8 @@ export default function AuthForm({ isSignUp }: Props) {
               type="email"
               placeholder="you@example.com"
               required
+              maxLength={254}
+              autoComplete="email"
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus-visible:ring-white"
             />
           </label>
@@ -75,6 +102,9 @@ export default function AuthForm({ isSignUp }: Props) {
               type="password"
               placeholder="••••••••"
               required
+              minLength={8}
+              maxLength={128}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus-visible:ring-white"
             />
           </label>
@@ -87,7 +117,7 @@ export default function AuthForm({ isSignUp }: Props) {
 
           <button
             type="submit"
-            disabled={pending}
+            disabled={isPending}
             className="mt-1 rounded-lg bg-black px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-gray-100"
           >
             {submitLabel}

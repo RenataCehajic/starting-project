@@ -43,7 +43,7 @@ export function createNote(
   data: { title?: string; contentJson?: string } = {}
 ): Note {
   const id = randomBytes(8).toString("hex");
-  const title = data.title ?? "Untitled note";
+  const title = (data.title ?? "Untitled note").trim().slice(0, 200) || "Untitled note";
   const contentJson = data.contentJson ?? EMPTY_DOC;
   db.run(`INSERT INTO notes (id, user_id, title, content_json) VALUES (?, ?, ?, ?)`, [
     id,
@@ -76,8 +76,9 @@ export function updateNote(
   const fields: string[] = [];
   const values: string[] = [];
   if (data.title !== undefined) {
+    const sanitized = data.title.trim().slice(0, 200);
     fields.push("title = ?");
-    values.push(data.title);
+    values.push(sanitized || "Untitled note");
   }
   if (data.contentJson !== undefined) {
     fields.push("content_json = ?");
