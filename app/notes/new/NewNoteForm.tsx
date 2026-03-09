@@ -8,6 +8,7 @@ import EditorToolbar from "@/app/components/EditorToolbar";
 
 export default function NewNoteForm() {
   const [title, setTitle] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +32,7 @@ export default function NewNoteForm() {
       editor?.getJSON() ?? { type: "doc", content: [] }
     );
     startTransition(async () => {
-      const result = await createNoteAction(title.trim(), contentJson);
+      const result = await createNoteAction(title.trim(), contentJson, isPublic);
       if (result?.error) setError(result.error);
     });
   }
@@ -67,6 +68,28 @@ export default function NewNoteForm() {
           <EditorContent editor={editor} />
         </div>
       </div>
+
+      <label className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-4 cursor-pointer dark:border-gray-700">
+        <div>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Public sharing
+          </span>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            Anyone with the link can view this note
+          </p>
+        </div>
+        <div className="relative">
+          <input
+            type="checkbox"
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+            className="sr-only peer"
+            aria-label="Enable public sharing"
+          />
+          <div className="w-10 h-6 rounded-full bg-gray-200 peer-checked:bg-black dark:bg-gray-700 dark:peer-checked:bg-white transition-colors" />
+          <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-gray-900 shadow transition-transform peer-checked:translate-x-4" />
+        </div>
+      </label>
 
       {error && (
         <p role="alert" aria-live="polite" className="text-sm text-red-600 dark:text-red-400">
