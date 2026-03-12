@@ -4,17 +4,9 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createNote, updateNote, deleteNote, setNotePublic, type Note } from "@/lib/notes";
+import { isValidTiptapJson } from "@/lib/tiptap";
 
 const MAX_TITLE_LENGTH = 200;
-
-function isValidTiptapJson(value: string): boolean {
-  try {
-    const doc = JSON.parse(value);
-    return doc !== null && typeof doc === "object" && doc.type === "doc";
-  } catch {
-    return false;
-  }
-}
 
 export async function createNoteAction(
   title: string,
@@ -31,6 +23,7 @@ export async function createNoteAction(
     return { error: "Note content is invalid. Please refresh and try again." };
   }
 
+  let noteId: string;
   try {
     const note = createNote(session.user.id, {
       title: sanitizedTitle,
@@ -39,10 +32,11 @@ export async function createNoteAction(
     if (isPublic) {
       setNotePublic(session.user.id, note.id, true);
     }
-    redirect(`/notes/${note.id}`);
+    noteId = note.id;
   } catch {
     return { error: "Failed to create note. Please try again." };
   }
+  redirect(`/notes/${noteId}`);
 }
 
 export async function updateNoteAction(
